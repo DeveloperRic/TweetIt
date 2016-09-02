@@ -8,4 +8,4 @@ You may use the source code of TweetIt, but you must also make the source code o
 TweetIt is licensed under the GPU License (General Public License)
 
 ### Resources
- * [Plugin Page](https://www.spigotmc.org/resources/motd-manager.28439/)
+ * [Plugin Page](https://www.spigotmc.org/resources/tweetit-twitter-api.28814/)
