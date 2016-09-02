@@ -1,0 +1,30 @@
+######################
+
+#TweetIt API Config
+config-version: 1
+
+######################
+
+#For the following info you will need to setup a new twitter application -> https://apps.twitter.com/app/new
+#Fill out the form and request your own access tokens.
+#You should now have all you need to edit the 'system' configutations.
+
+system:
+ consumerKey: ''
+ consumerSecret: ''
+ accessToken: ''
+ accessTokenSecret: ''
+#Set to true for increased Console Output
+debug: false
+auth:
+ pinLength: 7
+ #How many times should a unique pin be attempted?
+ pinTimeout: 100
+ #Should pins contain lower case keys?
+ lowercase-keys: true
+ #Should pins contain symbols?
+ symbol-keys: false
+ #Should pins contain numbers?
+ number-keys: true
+logger:
+ size: 5000

@@ -1,0 +1,7 @@
+main: com.rictacius.tweetIt.Main
+version: 0.1.0
+name: TweetIt
+
+commands:
+ tweetit:
+  description: Main command
