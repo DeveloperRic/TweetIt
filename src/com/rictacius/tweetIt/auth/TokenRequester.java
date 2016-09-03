@@ -70,6 +70,7 @@ public class TokenRequester implements Listener {
 					throw new TweetItException("Could not save authentication info for user (" + user.getId() + ")",
 							e.getCause());
 				}
+				listening = false;
 				user.setAuthenticated(true);
 				user.setClient(client);
 				user.message("");
