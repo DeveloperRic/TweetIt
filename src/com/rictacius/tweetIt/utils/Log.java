@@ -14,9 +14,10 @@ import net.md_5.bungee.api.ChatColor;
 public class Log {
 	private boolean enabled;
 	private ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
-	private ArrayList<String> timeline;
+	private ArrayList<String> timeline = new ArrayList<String>();;
 
 	public Log() {
+		enabled = true;
 	}
 
 	String prefix() {

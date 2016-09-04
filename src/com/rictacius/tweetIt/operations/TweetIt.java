@@ -1,9 +1,13 @@
 package com.rictacius.tweetIt.operations;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import com.rictacius.tweetIt.user.TwitterUser;
 import winterwell.jtwitter.Message;
@@ -24,6 +28,10 @@ import winterwell.jtwitter.User;
 public class TweetIt {
 	private Twitter twitter;
 
+	/**
+	 * <p>Creates a new set of operations for the TwitterUser</p>
+	 * @param user
+	 */
 	public TweetIt(TwitterUser user) {
 		twitter = new Twitter(user.getUsername(), user.getClient());
 	}
@@ -158,9 +166,22 @@ public class TweetIt {
 	 * @param directMessage
 	 *            - the message to extract image from
 	 * @return an InputStream of the image contained in a direct message
+	 * @deprecated in favour of getDirectMessageBufferedImage
 	 */
+	@Deprecated
 	public InputStream getDirectMessageImage(Message directMessage) {
 		return twitter.getDMImage(directMessage);
+	}
+
+	/**
+	 * Updated version of getDirectMessageImage
+	 * 
+	 * @param directMessage
+	 * @return a Buffered image, making it easy to convert using spigot's API
+	 * @throws IOException
+	 */
+	public BufferedImage getDirectMessageBufferedImage(Message directMessage) throws IOException {
+		return ImageIO.read(twitter.getDMImage(directMessage));
 	}
 
 	/**
@@ -343,5 +364,15 @@ public class TweetIt {
 	 */
 	public Status replyToTweet(String message, Number tweetID) {
 		return twitter.updateStatus(message, tweetID);
+	}
+
+	/**
+	 * Gets the latest tweet of a user. <b>Will return null if the user has never
+	 * tweeted of if the user's last 6 tweet were 'new-style' retweets!</b>
+	 * 
+	 * @return status of user
+	 */
+	public Status getLatestTweet() {
+		return twitter.getStatus();
 	}
 }

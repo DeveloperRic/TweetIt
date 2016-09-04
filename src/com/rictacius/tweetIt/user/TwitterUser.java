@@ -11,6 +11,7 @@ import winterwell.jtwitter.OAuthSignpostClient;
 
 /**
  * Class that represents an Instance of a twitter user
+ * 
  * @author RictAcius
  *
  */
@@ -22,6 +23,20 @@ public class TwitterUser {
 	private boolean authenticated;
 	private OAuthSignpostClient client;
 
+	/**
+	 * <p>
+	 * Creates a new twitter user
+	 * </p>
+	 * <p>
+	 * <p>
+	 * <b><u>Note:</u></b> The username of the user may never be known, and it
+	 * does not need to be. If you would need the username of the user, you
+	 * would need to request it from the user.
+	 * </p>
+	 * 
+	 * @param type
+	 * @param id
+	 */
 	public TwitterUser(TwitterUserType type, String id) {
 		this.setType(type);
 		this.setId(id);
@@ -151,7 +166,8 @@ public class TwitterUser {
 	}
 
 	/**
-	 * @param pin the userpin to set
+	 * @param pin
+	 *            the userpin to set
 	 */
 	public void setPin(String pin) {
 		this.pin = pin;

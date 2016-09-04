@@ -71,7 +71,7 @@ public class UserAuthorizer {
 	/**
 	 * Generates a random pin based on the UserAuthorizer pin settings
 	 * 
-	 * @return
+	 * @return the generated pin
 	 */
 	public String randomPin() {
 		if (pins.size() > maxpins) {
@@ -141,7 +141,7 @@ public class UserAuthorizer {
 	 * system</strong>
 	 * </p>
 	 * 
-	 * @param playerID
+	 * @param userID
 	 * @param accessToken
 	 * @throws GeneralSecurityException
 	 * @throws IOException
@@ -160,8 +160,8 @@ public class UserAuthorizer {
 	/**
 	 * Checks if the player's twitter account is registered
 	 * 
-	 * @param playerID
-	 * @return
+	 * @param userID
+	 * @return whether the user is registered or not
 	 */
 	public boolean isRegistered(String userID) {
 		return (accessKeysConfig.getString("keys." + userID + ".token") != null);
