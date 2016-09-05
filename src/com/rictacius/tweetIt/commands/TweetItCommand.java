@@ -53,6 +53,28 @@ public class TweetItCommand implements CommandExecutor {
 				Main.logger.log("Could not test TweetIt Authentication while requesting tokens!", 2);
 				e.printStackTrace();
 			}
+		} else if (args[0].equalsIgnoreCase("testauthchild")) {
+			if (!(sender instanceof Player)) {
+				sender.sendMessage(ChatColor.RED + "You cannot test authentication from console!");
+				return true;
+			}
+			if (args.length < 2) {
+				sender.sendMessage(ChatColor.RED + "/tweetit testauthchild <childID>");
+				return true;
+			}
+			if (Main.auth.isRegistered(args[1])) {
+				sender.sendMessage(ChatColor.RED + "That ID is already in use by another TwitterUser!");
+				return true;
+			}
+			Player player = (Player) sender;
+			TwitterUser parent = new TwitterUser(TwitterUserType.PLAYER, player.getUniqueId().toString());
+			TwitterUser child = new TwitterUser(TwitterUserType.OTHER, args[1]);
+			try {
+				Main.auth.requestTokens(parent, child);
+			} catch (Exception e) {
+				Main.logger.log("Could not test TweetIt Authentication while requesting tokens!", 2);
+				e.printStackTrace();
+			}
 		} else {
 			sendHelp(sender);
 		}
@@ -67,6 +89,8 @@ public class TweetItCommand implements CommandExecutor {
 		sender.sendMessage(ChatColor.GREEN + "/tweetit dump" + ChatColor.YELLOW + " - Prints debug info");
 		sender.sendMessage(
 				ChatColor.GREEN + "/tweetit testauth" + ChatColor.YELLOW + " - Tests Authentication (Players only!)");
+		sender.sendMessage(ChatColor.GREEN + "/tweetit testauthchild" + ChatColor.YELLOW
+				+ " - Tests Authentication for attachment users (Players only!)");
 		sender.sendMessage("");
 	}
 }

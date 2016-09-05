@@ -14,6 +14,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.rictacius.tweetIt.auth.TokenRequester;
+import com.rictacius.tweetIt.auth.TokenRequesterChild;
 import com.rictacius.tweetIt.auth.UserAuthorizer;
 import com.rictacius.tweetIt.commands.TweetItCommand;
 import com.rictacius.tweetIt.user.UserLoader;
@@ -91,6 +92,18 @@ public class Main extends JavaPlugin implements Listener {
 		try {
 			PluginManager pm = getServer().getPluginManager();
 			pm.registerEvents(requester, this);
+		} catch (Exception e) {
+			Methods.sendColoredMessage(this, ChatColor.AQUA, ("Error while registering events!"), ChatColor.RED);
+			Methods.sendColoredMessage(this, ChatColor.AQUA, ("Trace:"), ChatColor.RED);
+			e.printStackTrace();
+		}
+		Methods.sendColoredMessage(this, ChatColor.AQUA, ("Events successfuly registered!"), ChatColor.LIGHT_PURPLE);
+	}
+
+	public void registerTokenEvents(TokenRequesterChild tokenRequesterChild) {
+		try {
+			PluginManager pm = getServer().getPluginManager();
+			pm.registerEvents(tokenRequesterChild, this);
 		} catch (Exception e) {
 			Methods.sendColoredMessage(this, ChatColor.AQUA, ("Error while registering events!"), ChatColor.RED);
 			Methods.sendColoredMessage(this, ChatColor.AQUA, ("Trace:"), ChatColor.RED);
@@ -200,4 +213,5 @@ public class Main extends JavaPlugin implements Listener {
 			e.printStackTrace();
 		}
 	}
+
 }

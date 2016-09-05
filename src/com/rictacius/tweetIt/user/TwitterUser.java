@@ -1,9 +1,15 @@
 package com.rictacius.tweetIt.user;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
+import com.rictacius.tweetIt.Main;
 import com.rictacius.tweetIt.utils.TweetItException;
 
 import net.md_5.bungee.api.ChatColor;
@@ -171,5 +177,69 @@ public class TwitterUser {
 	 */
 	public void setPin(String pin) {
 		this.pin = pin;
+	}
+
+	/**
+	 * Gets a list of twitter users that are linked to the current user.
+	 * 
+	 * @return a list of TwitterUsers or null if the process was unsucessful
+	 */
+	public List<TwitterUser> getAttachments() {
+		List<TwitterUser> attachments = new ArrayList<TwitterUser>();
+		Main plugin = Main.pl;
+		File defaultFile = new File(plugin.getDataFolder(), "/default-user.yml");
+		File file = new File(plugin.getDataFolder(), "/users/" + id + ".yml");
+		if (!file.exists()) {
+			file.getParentFile().mkdirs();
+			plugin.saveResource("default-user.yml", false);
+			FileConfiguration dconfig = new YamlConfiguration();
+			dconfig = UserLoader.loadConfig(dconfig, defaultFile);
+			if (dconfig == null) {
+				return null;
+			}
+			if (!UserLoader.saveConfig(dconfig, file)) {
+				return null;
+			}
+			defaultFile.delete();
+		}
+		FileConfiguration config = new YamlConfiguration();
+		config = UserLoader.loadConfig(config, file);
+		if (config == null) {
+			return null;
+		}
+		if (config.getStringList("attachments") == null) {
+			return null;
+		}
+		for (String attachmentID : config.getStringList("attachments")) {
+			TwitterUser attachment = new TwitterUser(TwitterUserType.OTHER, attachmentID);
+			attachments.add(attachment);
+		}
+		return attachments;
+	}
+
+	public boolean setAttachments(List<TwitterUser> attachments) {
+		Main plugin = Main.pl;
+		File defaultFile = new File(plugin.getDataFolder(), "/default-user.yml");
+		File file = new File(plugin.getDataFolder(), "/users/" + id + ".yml");
+		if (!file.exists()) {
+			file.getParentFile().mkdirs();
+			plugin.saveResource("default-user.yml", false);
+			FileConfiguration dconfig = new YamlConfiguration();
+			dconfig = UserLoader.loadConfig(dconfig, defaultFile);
+			if (dconfig == null) {
+				return false;
+			}
+			if (!UserLoader.saveConfig(dconfig, file)) {
+				return false;
+			}
+			defaultFile.delete();
+		}
+		FileConfiguration config = new YamlConfiguration();
+		config = UserLoader.loadConfig(config, file);
+		if (config == null) {
+			return false;
+		}
+		config.set("attachments", attachments);
+		return UserLoader.saveConfig(config, file);
 	}
 }

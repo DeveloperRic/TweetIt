@@ -40,7 +40,7 @@ public class TweetIt {
 	 * Sends a tweet through the player's twitter account;
 	 * 
 	 * @param message
-	 * @return
+	 * @return the newly sent tweet
 	 * @throws TwitterException
 	 */
 	public Status sendTweet(String message) throws TwitterException {

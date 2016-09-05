@@ -12,6 +12,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.rictacius.tweetIt.Main;
 import com.rictacius.tweetIt.utils.TweetItException;
+import com.rictacius.tweetIt.utils.config.ConfigType;
+import com.rictacius.tweetIt.utils.config.ConfigUpdater;
 
 import winterwell.jtwitter.OAuthSignpostClient;
 
@@ -29,6 +31,42 @@ public class UserLoader {
 		loadUsers();
 	}
 
+	public static FileConfiguration loadConfig(FileConfiguration config, File file) {
+		try {
+			config.load(file);
+		} catch (FileNotFoundException e) {
+			Main.logger.log("[TweetIt] Could not load User file " + file.getName()
+					+ " make sure you do not edit user files manually." + " Reset the user config and report the bug.",
+					3);
+			e.printStackTrace();
+			return null;
+		} catch (IOException e) {
+			Main.logger.log("[TweetIt] Could not load User file " + file.getName()
+					+ " make sure you do not edit user files manually." + " Reset the user config and report the bug.",
+					3);
+			e.printStackTrace();
+			return null;
+		} catch (InvalidConfigurationException e) {
+			Main.logger.log("[TweetIt] Could not load User file " + file.getName()
+					+ " make sure you do not edit user files manually." + " Reset the user config and report the bug.",
+					3);
+			e.printStackTrace();
+			return null;
+		}
+		return config;
+	}
+
+	public static boolean saveConfig(FileConfiguration config, File file) {
+		try {
+			config.save(file);
+		} catch (IOException e) {
+			Main.logger.log("[TweetIt] Could not save User file! Please report this!", 3);
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+
 	public static void loadUsers() {
 		users.clear();
 		File defaultFile = new File(plugin.getDataFolder(), "/default-user.yml");
@@ -37,13 +75,8 @@ public class UserLoader {
 			plugin.saveResource("default-user.yml", false);
 		}
 		FileConfiguration dconfig = new YamlConfiguration();
-		try {
-			dconfig.load(defaultFile);
-		} catch (IOException | InvalidConfigurationException e) {
-			Main.logger.log(
-					"[TweetIt] Could not load default config while loading User files! Please reset your default config by deleting it!",
-					3);
-			e.printStackTrace();
+		dconfig = loadConfig(dconfig, defaultFile);
+		if (dconfig == null) {
 			return;
 		}
 		File folder = new File(plugin.getDataFolder(), "/users");
@@ -51,23 +84,14 @@ public class UserLoader {
 		for (File userFile : folder.listFiles()) {
 			if (userFile.isFile() && !userFile.isDirectory()) {
 				FileConfiguration config = new YamlConfiguration();
-				try {
-					config.load(userFile);
-				} catch (FileNotFoundException e) {
-					Main.logger.log("[TweetIt] Could not load User file " + userFile.getName()
-							+ " make sure you do not edit user files manually."
-							+ " Reset the user config and report the bug.", 3);
-					e.printStackTrace();
-				} catch (IOException e) {
-					Main.logger.log("[TweetIt] Could not load User file " + userFile.getName()
-							+ " make sure you do not edit user files manually."
-							+ " Reset the user config and report the bug.", 3);
-					e.printStackTrace();
-				} catch (InvalidConfigurationException e) {
-					Main.logger.log("[TweetIt] Could not load User file " + userFile.getName()
-							+ " make sure you do not edit user files manually."
-							+ " Reset the user config and report the bug.", 3);
-					e.printStackTrace();
+				config = loadConfig(config, userFile);
+				if (config == null) {
+					return;
+				}
+				config = ConfigUpdater.updateOtherConfig(userFile.getName().replaceAll(".yml", ""), config,
+						ConfigType.USER);
+				if (!saveConfig(config, userFile)) {
+					return;
 				}
 				String id = userFile.getName().replaceAll(".yml", "");
 				String username = config.getString("username");
@@ -130,20 +154,12 @@ public class UserLoader {
 			file.getParentFile().mkdirs();
 			plugin.saveResource("default-user.yml", false);
 			FileConfiguration dconfig = new YamlConfiguration();
-			try {
-				dconfig.load(defaultFile);
-			} catch (IOException | InvalidConfigurationException e) {
-				Main.logger.log("[TweetIt] Could not load default config while saving User file!"
-						+ " Please reset your default config by deleting it!", 3);
-				e.printStackTrace();
+			dconfig = loadConfig(dconfig, defaultFile);
+			if (dconfig == null) {
 				return;
 			}
-			try {
-				dconfig.save(file);
-			} catch (IOException e) {
-				Main.logger.log("[TweetIt] Could not save default config while saving User file!"
-						+ " Please reset your default config by deleting it!", 3);
-				e.printStackTrace();
+			if (!saveConfig(dconfig, file)) {
+				return;
 			}
 			defaultFile.delete();
 		}

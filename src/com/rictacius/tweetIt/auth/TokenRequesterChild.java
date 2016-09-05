@@ -16,83 +16,84 @@ import com.rictacius.tweetIt.utils.TweetItException;
 import winterwell.jtwitter.OAuthSignpostClient;
 import winterwell.jtwitter.TwitterException;
 
-/**
- * A class to recieve authentication details from twitter
- * @author RictAcius
- *
- */
-public class TokenRequester implements Listener {
-	private TwitterUser user;
+public class TokenRequesterChild implements Listener {
+	private TwitterUser parent;
+	private TwitterUser child;
 	private OAuthSignpostClient client;
 	private boolean listening;
 	private String[] authCodes;
 
 	/**
-	 * Request tokens for a singular user
-	 * @param user
+	 * Request tokens for an attachment user.
+	 * 
+	 * @param parent
+	 * @param child
 	 * @param oauthClient
 	 */
-	public TokenRequester(TwitterUser user, OAuthSignpostClient oauthClient) {
-		this.user = user;
+	public TokenRequesterChild(TwitterUser parent, TwitterUser child, OAuthSignpostClient oauthClient) {
+		this.child = child;
+		this.parent = parent;
 		this.client = oauthClient;
 		try {
-			user.message(ChatColor.LIGHT_PURPLE + "Now Listening for your input, type @cancel to cancel");
+			parent.message(ChatColor.LIGHT_PURPLE + "Now Listening for your input, type @cancel to cancel");
 		} catch (TweetItException e) {
-			Main.logger.log("Could not initialise TokenRequester for (" + user.getId() + ") user is offline!", 3);
+			Main.logger.log("Could not initialise TokenRequester for (" + child.getId() + ") parent user is offline!",
+					3);
 		}
 		listening = true;
 	}
-	
+
 	@EventHandler
 	public void listenForPin(AsyncPlayerChatEvent event) throws TweetItException {
 		if (!event.isCancelled()) {
 			if (!listening)
 				return;
 			String id = event.getPlayer().getUniqueId().toString();
-			if (id.equals(user.getId())) {
+			if (id.equals(parent.getId())) {
 				event.setCancelled(true);
 				if (event.getMessage().equals("@cancel")) {
 					listening = false;
-					user.message(ChatColor.GOLD + "No longer listening for your input.");
+					parent.message(ChatColor.GOLD + "No longer listening for your input.");
 					return;
 				}
-				user.message(ChatColor.GOLD + "Validating Verification code...");
+				parent.message(ChatColor.GOLD + "Validating Verification code...");
 				try {
 					client.setAuthorizationCode(event.getMessage());
 				} catch (TwitterException e) {
 					try {
-						user.message(
+						parent.message(
 								ChatColor.RED + "Could not verifiy that verification code! See console for details!");
 					} catch (TweetItException e1) {
 					}
 					throw new TweetItException(
-							"Could not verifiy that verification code of user (" + user.getId() + ")", e.getCause());
+							"Could not verifiy that verification code of user (" + child.getId() + ")", e.getCause());
 				}
 				authCodes = client.getAccessToken();
 				try {
-					Main.auth.storeAccessToken(user.getId(), authCodes);
+					Main.auth.storeAccessToken(child.getId(), authCodes);
 				} catch (GeneralSecurityException | IOException e) {
-					throw new TweetItException("Could not save authentication info for user (" + user.getId() + ")",
+					throw new TweetItException("Could not save authentication info for user (" + child.getId() + ")",
 							e.getCause());
 				}
 				listening = false;
-				user.setAuthenticated(true);
-				user.setClient(client);
-				user.message("");
-				user.message(ChatColor.GREEN + "Your twitter account has now been authenticated hooray! "
+				child.setAuthenticated(true);
+				child.setClient(client);
+				parent.message("");
+				parent.message(ChatColor.GREEN + "Your twitter account has now been authenticated hooray! "
 						+ "The following message is your pin, you must keep that pin safe so that you will be"
 						+ " granted access to your account if a plugin requires it!");
 				String pin = Main.auth.randomPin();
-				user.message(ChatColor.GOLD + "PIN: " + ChatColor.YELLOW + pin);
-				user.message("");
-				user.setPin(pin);
-				UserLoader.storeUser(user);
+				parent.message(ChatColor.GOLD + "PIN: " + ChatColor.YELLOW + pin);
+				parent.message("");
+				child.setPin(pin);
+				UserLoader.storeUser(child);
 			}
 		}
 	}
 
 	/**
-	 * @return the authCodes
+	 * @return the authCodes <b>will return null if the user has not been
+	 *         authorized yet.</b>
 	 */
 	public String[] getAuthCodes() {
 		return authCodes;
@@ -108,4 +109,5 @@ public class TokenRequester implements Listener {
 	public void setAuthCodes(String[] authCodes) {
 		this.authCodes = authCodes;
 	}
+
 }

@@ -106,7 +106,8 @@ public class UserAuthorizer {
 	/**
 	 * Request auth data for a specific player's twitter account.
 	 * 
-	 * @param user does not need to be a verified user.
+	 * @param user
+	 *            does not need to be a verified user.
 	 * @throws Exception
 	 */
 	public void requestTokens(TwitterUser user) throws Exception {
@@ -132,6 +133,30 @@ public class UserAuthorizer {
 		Main.pl.registerTokenEvents(new TokenRequester(user, oauthClient));
 	}
 
+	public void requestTokens(TwitterUser parent, TwitterUser child) throws Exception {
+		OAuthSignpostClient oauthClient = new OAuthSignpostClient(Main.consumerKey, Main.consumerSecret, "oob");
+		parent.message("");
+		parent.message(ChatColor.GREEN + "Contacting Twitter...");
+		try {
+			String link = oauthClient.authorizeUrl().toString();
+			parent.message("");
+			parent.message(ChatColor.GREEN
+					+ "Open the following URL and grant TweetIt access to the account you want to use with this 'dummy' TwitterUser:");
+			parent.message(ChatColor.YELLOW + link);
+			parent.message("");
+		} catch (Exception e) {
+			e.printStackTrace();
+			parent.message(ChatColor.RED
+					+ "Failed to get oath URL, please try again later and if the problem persits report to the server admin.");
+			if (Main.consumerKey.equals("") || Main.consumerSecret.equals("")) {
+				parent.message(ChatColor.RED + "Detected defective ConsumerKey and/or ConsumerSecret. "
+						+ "If you are an admin, please configure TweetIt properly to use its API!");
+			}
+		}
+		parent.message(ChatColor.GREEN + "When done, type in the verification PIN from Twitter in chat.");
+		Main.pl.registerTokenEvents(new TokenRequesterChild(parent, child, oauthClient));
+	}
+
 	/**
 	 * <p>
 	 * Store access tokens of a player's twitter account
@@ -142,7 +167,7 @@ public class UserAuthorizer {
 	 * </p>
 	 * 
 	 * @param userID
-	 * @param accessToken
+	 * @param codes
 	 * @throws GeneralSecurityException
 	 * @throws IOException
 	 */
@@ -176,8 +201,8 @@ public class UserAuthorizer {
 	 * registered</strong>
 	 * </p>
 	 * 
-	 * @param playerID
-	 * @return
+	 * @param userID
+	 * @return the user's access token
 	 * @throws GeneralSecurityException
 	 * @throws IOException
 	 */
