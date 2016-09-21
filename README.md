@@ -6,7 +6,7 @@ You may use the source code of TweetIt, but you must provide clear and obvious a
 "Content created with [TweetIt](https://www.spigotmc.org/resources/tweetit.28848/)"
 
 ### License
-TweetIt is licensed under the MIT Lisence
+TweetIt is licensed under the MIT License
 
 ### Resources
  * [Plugin Page](https://www.spigotmc.org/resources/tweetit.28848/)
