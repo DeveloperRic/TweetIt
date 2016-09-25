@@ -129,8 +129,7 @@ public class UserLoader {
 							+ " Reset the user config and report the bug.", 3);
 					userFile.delete();
 				}
-				TwitterUser user = new TwitterUser(type, id);
-				user.setUsername(username);
+				TwitterUser user = new TwitterUser(type, id, username);
 				user.setAuthenticated(authenticated);
 				user.setClient(client);
 				user.setPin(pin);

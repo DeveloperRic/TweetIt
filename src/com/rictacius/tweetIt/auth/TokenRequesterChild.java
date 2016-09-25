@@ -65,15 +65,15 @@ public class TokenRequesterChild implements Listener {
 								ChatColor.RED + "Could not verifiy that verification code! See console for details!");
 					} catch (TweetItException e1) {
 					}
-					throw new TweetItException(
-							"Could not verifiy that verification code of user (" + child.getId() + ")", e.getCause());
+					throw new TweetItException.EAuthentication(child.getUsername(),
+							"Could not verifiy that verification code of user (" + child.getId() + ")");
 				}
 				authCodes = client.getAccessToken();
 				try {
 					Main.auth.storeAccessToken(child.getId(), authCodes);
 				} catch (GeneralSecurityException | IOException e) {
-					throw new TweetItException("Could not save authentication info for user (" + child.getId() + ")",
-							e.getCause());
+					throw new TweetItException.EAuthentication(child.getUsername(),
+							"Could not save authentication info for user (" + child.getId() + ")");
 				}
 				listening = false;
 				child.setAuthenticated(true);

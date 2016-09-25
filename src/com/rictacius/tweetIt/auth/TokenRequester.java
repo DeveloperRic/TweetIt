@@ -18,6 +18,7 @@ import winterwell.jtwitter.TwitterException;
 
 /**
  * A class to recieve authentication details from twitter
+ * 
  * @author RictAcius
  *
  */
@@ -29,6 +30,7 @@ public class TokenRequester implements Listener {
 
 	/**
 	 * Request tokens for a singular user
+	 * 
 	 * @param user
 	 * @param oauthClient
 	 */
@@ -42,7 +44,7 @@ public class TokenRequester implements Listener {
 		}
 		listening = true;
 	}
-	
+
 	@EventHandler
 	public void listenForPin(AsyncPlayerChatEvent event) throws TweetItException {
 		if (!event.isCancelled()) {
@@ -65,15 +67,15 @@ public class TokenRequester implements Listener {
 								ChatColor.RED + "Could not verifiy that verification code! See console for details!");
 					} catch (TweetItException e1) {
 					}
-					throw new TweetItException(
-							"Could not verifiy that verification code of user (" + user.getId() + ")", e.getCause());
+					throw new TweetItException.EAuthentication(user.getUsername(),
+							"Could not verifiy that verification code of user (" + user.getId() + ")");
 				}
 				authCodes = client.getAccessToken();
 				try {
 					Main.auth.storeAccessToken(user.getId(), authCodes);
 				} catch (GeneralSecurityException | IOException e) {
-					throw new TweetItException("Could not save authentication info for user (" + user.getId() + ")",
-							e.getCause());
+					throw new TweetItException.EAuthentication(user.getUsername(),
+							"Could not save authentication info for user (" + user.getId() + ")");
 				}
 				listening = false;
 				user.setAuthenticated(true);

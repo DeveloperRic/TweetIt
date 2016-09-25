@@ -38,7 +38,8 @@ public class ErrorFile {
 	 * @param error
 	 * @return a bastebin link to the error.
 	 */
-	public static URL writeError(String error) {
+	public static ArrayList<String> writeError(String error) {
+		ArrayList<String> returnl = new ArrayList<String>();
 		try {
 			Date now = new Date();
 			SimpleDateFormat formatter = new SimpleDateFormat("EEEE-MMMM-d-yyyy-HH-mm");
@@ -114,8 +115,11 @@ public class ErrorFile {
 			config.set("timeline", timeline);
 			config.save(errorFile);
 			defaultfile.delete();
-			return Pastebin.pastePaste("707d4468afc6923cb547cc3eb5a44297", config.saveToString(),
+			returnl.add(errorFile.getAbsolutePath());
+			URL link = Pastebin.pastePaste("707d4468afc6923cb547cc3eb5a44297", config.saveToString(),
 					"MOTDManager Dump File");
+			returnl.add(link.toString());
+			return returnl;
 		} catch (Exception e) {
 			console.sendMessage(prefix + "Could not write error dump file did you edit the configs correctly?");
 			e.printStackTrace();

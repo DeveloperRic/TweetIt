@@ -29,6 +29,7 @@ public class Log {
 			if (timeline.size() >= Integer.parseInt(Main.pl.getConfig().getString("logger.size")))
 				timeline.clear();
 			String send = "";
+			String raw = "| > |" + message;
 			switch (lvl) {
 			case 1:
 				send = (prefix() + ChatColor.WHITE + message);
@@ -39,11 +40,24 @@ public class Log {
 			default:
 				send = (prefix() + ChatColor.AQUA + message);
 			}
-			console.sendMessage(send);
+			if (Boolean.parseBoolean(Main.pl.getConfig().getString("debug"))) {
+				console.sendMessage(send);
+			}
 			SimpleDateFormat formatter = new SimpleDateFormat("d, m, yyyy HH:mm");
 			String dateString = formatter.format(new Date());
-			timeline.add(dateString + send);
+			timeline.add(dateString + raw);
 		}
+	}
+
+	public void log(String message, int lvl, Exception e) {
+		log("--------------------------------------------------------", lvl);
+		log(message, lvl);
+		log(" E: " + e.getClass().getSimpleName() + ", Trace: ", lvl);
+		for (StackTraceElement el : e.getStackTrace()) {
+			log("  Class=" + el.getClassName() + " , Method=" + el.getMethodName() + " , Loc=" + el.getLineNumber(),
+					lvl);
+		}
+		log("--------------------------------------------------------", lvl);
 	}
 
 	public void setEnabled(boolean enabled) {

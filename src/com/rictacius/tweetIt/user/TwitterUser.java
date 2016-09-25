@@ -10,10 +10,13 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.rictacius.tweetIt.Main;
+import com.rictacius.tweetIt.events.TweetItEvent;
 import com.rictacius.tweetIt.utils.TweetItException;
+import com.rictacius.tweetIt.utils.TweetItException.EEvent;
 
 import net.md_5.bungee.api.ChatColor;
 import winterwell.jtwitter.OAuthSignpostClient;
+import winterwell.jtwitter.User;
 
 /**
  * Class that represents an Instance of a twitter user
@@ -39,10 +42,47 @@ public class TwitterUser {
 	 * does not need to be. If you would need the username of the user, you
 	 * would need to request it from the user.
 	 * </p>
+	 * <p>
+	 * <strong>You may set the username to <i>null</i> if you have to.</strong>
+	 * </p>
 	 * 
 	 * @param type
 	 * @param id
 	 */
+	public TwitterUser(TwitterUserType type, String id, String username) {
+		this.setType(type);
+		this.setId(id);
+		this.username = username;
+	}
+
+	public TwitterUser(TweetItEvent.EventType eventType, TwitterUserType type, String username) {
+		if (!type.equals(TwitterUserType.EVENT)) {
+			try {
+				throw new TweetItException.EEvent(eventType,
+						"You cannot use this contructor if you are not making a TweetIt Event!");
+			} catch (EEvent e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * <p>
+	 * Creates a new twitter user
+	 * </p>
+	 * <p>
+	 * <p>
+	 * <b><u>Note:</u></b> The username of the user may never be known, and it
+	 * does not need to be. If you would need the username of the user, you
+	 * would need to request it from the user.
+	 * </p>
+	 * 
+	 * @param type
+	 * @param id
+	 * @deprecated
+	 * @see #TwitterUser(TwitterUserType, String, String)
+	 */
+	@Deprecated
 	public TwitterUser(TwitterUserType type, String id) {
 		this.setType(type);
 		this.setId(id);
@@ -122,7 +162,7 @@ public class TwitterUser {
 			try {
 				Bukkit.getPlayer(UUID.fromString(id)).sendMessage(message);
 			} catch (Exception e) {
-				throw new TweetItException("You cannot send a message to an offline player!", e.getCause());
+				throw new TweetItException.EUser(this, "You cannot send a message to an offline player!");
 			}
 		} else if (type == TwitterUserType.SYSTEM) {
 			Bukkit.getConsoleSender().sendMessage(message);
@@ -211,12 +251,19 @@ public class TwitterUser {
 			return null;
 		}
 		for (String attachmentID : config.getStringList("attachments")) {
-			TwitterUser attachment = new TwitterUser(TwitterUserType.OTHER, attachmentID);
+			TwitterUser attachment = UserLoader.getUsers().get(attachmentID);
 			attachments.add(attachment);
 		}
 		return attachments;
 	}
 
+	/**
+	 * 
+	 * @param attachments
+	 *            the list of users to attach to
+	 * @return a boolean representing whether or not this operation was
+	 *         successful
+	 */
 	public boolean setAttachments(List<TwitterUser> attachments) {
 		Main plugin = Main.pl;
 		File defaultFile = new File(plugin.getDataFolder(), "/default-user.yml");
@@ -241,5 +288,16 @@ public class TwitterUser {
 		}
 		config.set("attachments", attachments);
 		return UserLoader.saveConfig(config, file);
+	}
+
+	/**
+	 * Attempts to generate a User instance for this TwitterUser
+	 * 
+	 * @return a User instance equal() to the actual TwitterUser or null if a
+	 *         username is not set
+	 */
+	public User generateUser() {
+		String username = getUsername();
+		return (username == null) ? null : (username.length() == 0) ? null : new User(username);
 	}
 }

@@ -208,7 +208,8 @@ public class UserAuthorizer {
 	 */
 	public String getAccessToken(String userID) throws GeneralSecurityException, IOException, TweetItException {
 		if (!isRegistered(userID)) {
-			throw new TweetItException("The user's credentials have not yet been registered! ID:" + userID);
+			throw new TweetItException.EAuthentication(userID,
+					"The user's credentials have not yet been registered! ID:" + userID);
 		}
 		String token = accessKeysConfig.getString("keys." + userID + ".token");
 		token = TweetItEncrypter.decrypt(token);
@@ -217,7 +218,8 @@ public class UserAuthorizer {
 
 	public String getAccessTokenSecret(String userID) throws GeneralSecurityException, IOException, TweetItException {
 		if (!isRegistered(userID)) {
-			throw new TweetItException("The user's credentials have not yet been registered! ID:" + userID);
+			throw new TweetItException.EAuthentication(userID,
+					"The user's credentials have not yet been registered! ID:" + userID);
 		}
 		String tokenSecret = accessKeysConfig.getString("keys." + userID + ".tokenSecret");
 		tokenSecret = TweetItEncrypter.decrypt(tokenSecret);

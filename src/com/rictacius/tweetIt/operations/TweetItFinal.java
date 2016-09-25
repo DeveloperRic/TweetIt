@@ -9,16 +9,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import com.rictacius.tweetIt.events.UserFollowedUserEvent;
-import com.rictacius.tweetIt.events.UserLikeTweetEvent;
-import com.rictacius.tweetIt.events.UserRetweetEvent;
-import com.rictacius.tweetIt.events.UserSearchEvent;
-import com.rictacius.tweetIt.events.UserSentDirectMessageEvent;
-import com.rictacius.tweetIt.events.UserSentTweetEvent;
-import com.rictacius.tweetIt.events.UserUnlikeTweetEvent;
 import com.rictacius.tweetIt.events.TweetItEvent.EventType;
-import com.rictacius.tweetIt.events.UserDeletedDirectMessageEvent;
-import com.rictacius.tweetIt.events.UserDeletedTweetEvent;
 import com.rictacius.tweetIt.user.TwitterUser;
 import com.rictacius.tweetIt.user.TwitterUserType;
 
@@ -31,13 +22,14 @@ import winterwell.jtwitter.Twitter_Users;
 import winterwell.jtwitter.User;
 
 /**
- * Class that handles all of TweetIt's basic operations
+ * <p>
+ * <strong>WARNING:</strong> This class does not fire any events!
+ * </p>
  * 
  * @author RictAcius
  *
  */
-public class TweetIt extends Operational {
-
+public final class TweetItFinal extends Operational {
 	/**
 	 * <p>
 	 * Creates a new set of operations for the TwitterUser
@@ -45,12 +37,8 @@ public class TweetIt extends Operational {
 	 * 
 	 * @param user
 	 */
-	public TweetIt(TwitterUser user) {
+	public TweetItFinal(TwitterUser user) {
 		super(user);
-	}
-
-	public TweetIt(TwitterUser user, boolean isProtected) {
-		super(user, isProtected);
 	}
 
 	/**
@@ -62,7 +50,6 @@ public class TweetIt extends Operational {
 	 */
 	public Status sendTweet(String message) throws TwitterException {
 		Status status = twitter.updateStatus(message);
-		new UserSentTweetEvent(user, status);
 		return status;
 	}
 
@@ -87,7 +74,6 @@ public class TweetIt extends Operational {
 	 */
 	public Message sendDirectMessage(String target, String message) throws TwitterException {
 		Message dmessage = twitter.sendMessage(target, message);
-		new UserSentDirectMessageEvent(user, dmessage);
 		return dmessage;
 	}
 
@@ -109,7 +95,6 @@ public class TweetIt extends Operational {
 	 */
 	public List<Status> searchTwitter(String searchQuery) {
 		List<Status> result = twitter.search(searchQuery);
-		new UserSearchEvent(user, result);
 		return result;
 	}
 
@@ -125,7 +110,6 @@ public class TweetIt extends Operational {
 		Twitter_Users users = twitter.users();
 		users.follow(username);
 		TwitterUser tuser = new TwitterUser(EventType.USER_FOLLOWED_USER, TwitterUserType.EVENT, username);
-		new UserFollowedUserEvent(user, tuser);
 		return tuser;
 	}
 
@@ -141,15 +125,12 @@ public class TweetIt extends Operational {
 		users.follow(userToFollow.getUsername());
 		TwitterUser tuser = new TwitterUser(EventType.USER_FOLLOWED_USER, TwitterUserType.EVENT,
 				userToFollow.getUsername());
-		new UserFollowedUserEvent(user, tuser);
 		return tuser;
 	}
 
 	@Deprecated
 	public User followUser(User userToFollow) {
 		Twitter_Users users = twitter.users();
-		new UserFollowedUserEvent(user,
-				new TwitterUser(EventType.USER_FOLLOWED_USER, TwitterUserType.EVENT, userToFollow.getScreenName()));
 		return users.follow(userToFollow);
 	}
 
@@ -256,9 +237,8 @@ public class TweetIt extends Operational {
 	 *            - the id of the direct message to delete
 	 */
 	public void deleteDirectMessage(Number id) {
-		Message pre = twitter.getDirectMessage(id);
+		twitter.getDirectMessage(id);
 		twitter.destroyMessage(id);
-		new UserDeletedDirectMessageEvent(user, pre);
 	}
 
 	/**
@@ -268,9 +248,8 @@ public class TweetIt extends Operational {
 	 *            - the id of the tweet to delete
 	 */
 	public void deleteTweet(Number id) {
-		Status pre = twitter.getStatus(id);
+		twitter.getStatus(id);
 		twitter.destroyStatus(id);
-		new UserDeletedTweetEvent(user, pre);
 	}
 
 	/**
@@ -360,7 +339,7 @@ public class TweetIt extends Operational {
 	/**
 	 * the User instance of the TwitterUser
 	 * 
-	 * @return the USer
+	 * @return the User
 	 * @deprecated infavour of generateUser()
 	 * @see TwitterUser#generateUser()
 	 */
@@ -413,7 +392,6 @@ public class TweetIt extends Operational {
 	 */
 	public Status retweet(Status tweet) {
 		Status retweet = twitter.retweet(tweet);
-		new UserRetweetEvent(user, tweet, retweet, false);
 		return retweet;
 	}
 
@@ -428,7 +406,6 @@ public class TweetIt extends Operational {
 	 */
 	public Status quoteTweet(Status tweet, String message) {
 		Status quote = twitter.retweetWithComment(tweet, message);
-		new UserRetweetEvent(user, tweet, quote, true);
 		return quote;
 	}
 
@@ -442,11 +419,6 @@ public class TweetIt extends Operational {
 	 */
 	public Status setFavoriteTweet(Status tweet, boolean favourite) {
 		Status s = twitter.setFavorite(tweet, favourite);
-		if (favourite) {
-			new UserLikeTweetEvent(user, s);
-		} else {
-			new UserUnlikeTweetEvent(user, s);
-		}
 		return s;
 	}
 
@@ -457,7 +429,6 @@ public class TweetIt extends Operational {
 	 */
 	public Status updateStatus(String message) {
 		Status tweet = twitter.updateStatus(message);
-		new UserSentTweetEvent(user, tweet);
 		return tweet;
 	}
 
@@ -472,7 +443,6 @@ public class TweetIt extends Operational {
 	 */
 	public Status updateStatus(String message, BigInteger tweetID, File mediaFile) {
 		Status tweet = twitter.updateStatusWithMedia(message, tweetID, mediaFile);
-		new UserSentTweetEvent(user, tweet);
 		return tweet;
 	}
 
@@ -487,7 +457,6 @@ public class TweetIt extends Operational {
 	 */
 	public Status updateStatus(String message, BigInteger tweetID, List<File> mediaFiles) {
 		Status tweet = twitter.updateStatusWithMedia(message, tweetID, mediaFiles);
-		new UserSentTweetEvent(user, tweet);
 		return tweet;
 	}
 
@@ -501,7 +470,6 @@ public class TweetIt extends Operational {
 	 */
 	public Status replyToTweet(String message, Number tweetID) {
 		Status tweet = twitter.updateStatus(message, tweetID);
-		new UserSentTweetEvent(user, tweet);
 		return tweet;
 	}
 
@@ -515,5 +483,4 @@ public class TweetIt extends Operational {
 	public Status getLatestTweet() {
 		return twitter.getStatus();
 	}
-
 }
