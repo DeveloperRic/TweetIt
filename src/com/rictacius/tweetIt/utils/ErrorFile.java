@@ -117,7 +117,7 @@ public class ErrorFile {
 			defaultfile.delete();
 			returnl.add(errorFile.getAbsolutePath());
 			URL link = Pastebin.pastePaste("707d4468afc6923cb547cc3eb5a44297", config.saveToString(),
-					"MOTDManager Dump File");
+					"TweetIt Dump File");
 			returnl.add(link.toString());
 			return returnl;
 		} catch (Exception e) {

@@ -158,7 +158,7 @@ public class TwitterUser {
 	 *             player is not online
 	 */
 	public void message(String message) throws TweetItException {
-		if (type == TwitterUserType.PLAYER) {
+		if (type == TwitterUserType.PLAYER || type == TwitterUserType.DISPOSABLE_PLAYER) {
 			try {
 				Bukkit.getPlayer(UUID.fromString(id)).sendMessage(message);
 			} catch (Exception e) {
@@ -226,6 +226,9 @@ public class TwitterUser {
 	 */
 	public List<TwitterUser> getAttachments() {
 		List<TwitterUser> attachments = new ArrayList<TwitterUser>();
+		if (type == TwitterUserType.TEMPORARY || type == TwitterUserType.DISPOSABLE_PLAYER) {
+			return attachments;
+		}
 		Main plugin = Main.pl;
 		File defaultFile = new File(plugin.getDataFolder(), "/default-user.yml");
 		File file = new File(plugin.getDataFolder(), "/users/" + id + ".yml");

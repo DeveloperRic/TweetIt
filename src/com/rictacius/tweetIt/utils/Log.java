@@ -43,7 +43,7 @@ public class Log {
 			if (Boolean.parseBoolean(Main.pl.getConfig().getString("debug"))) {
 				console.sendMessage(send);
 			}
-			SimpleDateFormat formatter = new SimpleDateFormat("d, m, yyyy HH:mm");
+			SimpleDateFormat formatter = new SimpleDateFormat("d/m/yyyy HH:mm");
 			String dateString = formatter.format(new Date());
 			timeline.add(dateString + raw);
 		}

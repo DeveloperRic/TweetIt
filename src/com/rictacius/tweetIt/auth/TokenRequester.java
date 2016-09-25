@@ -10,6 +10,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import com.rictacius.tweetIt.Main;
 import com.rictacius.tweetIt.user.TwitterUser;
+import com.rictacius.tweetIt.user.TwitterUserType;
 import com.rictacius.tweetIt.user.UserLoader;
 import com.rictacius.tweetIt.utils.TweetItException;
 
@@ -42,6 +43,7 @@ public class TokenRequester implements Listener {
 		} catch (TweetItException e) {
 			Main.logger.log("Could not initialise TokenRequester for (" + user.getId() + ") user is offline!", 3);
 		}
+		Main.logger.log("Created new TokenRequester for " + user.getId() + "!", 1);
 		listening = true;
 	}
 
@@ -56,6 +58,7 @@ public class TokenRequester implements Listener {
 				if (event.getMessage().equals("@cancel")) {
 					listening = false;
 					user.message(ChatColor.GOLD + "No longer listening for your input.");
+					Main.logger.log("Stopped listening for inputs", 1);
 					return;
 				}
 				user.message(ChatColor.GOLD + "Validating Verification code...");
@@ -67,16 +70,11 @@ public class TokenRequester implements Listener {
 								ChatColor.RED + "Could not verifiy that verification code! See console for details!");
 					} catch (TweetItException e1) {
 					}
+					Main.logger.log("Could not verifiy that verification code of user (" + user.getId() + ")", 3, e);
 					throw new TweetItException.EAuthentication(user.getUsername(),
 							"Could not verifiy that verification code of user (" + user.getId() + ")");
 				}
 				authCodes = client.getAccessToken();
-				try {
-					Main.auth.storeAccessToken(user.getId(), authCodes);
-				} catch (GeneralSecurityException | IOException e) {
-					throw new TweetItException.EAuthentication(user.getUsername(),
-							"Could not save authentication info for user (" + user.getId() + ")");
-				}
 				listening = false;
 				user.setAuthenticated(true);
 				user.setClient(client);
@@ -88,7 +86,27 @@ public class TokenRequester implements Listener {
 				user.message(ChatColor.GOLD + "PIN: " + ChatColor.YELLOW + pin);
 				user.message("");
 				user.setPin(pin);
-				UserLoader.storeUser(user);
+				if (user.getType() != TwitterUserType.TEMPORARY
+						&& user.getType() != TwitterUserType.DISPOSABLE_PLAYER) {
+					try {
+						Main.auth.storeAccessToken(user.getId(), authCodes);
+					} catch (GeneralSecurityException | IOException e) {
+						Main.logger.log("Could not save authentication info for user (" + user.getId() + ")", 3, e);
+						throw new TweetItException.EAuthentication(user.getUsername(),
+								"Could not save authentication info for user (" + user.getId() + ")");
+					}
+					UserLoader.storeUser(user);
+				} else {
+					try {
+						Main.auth.storeAccessToken(user.getId(), authCodes);
+					} catch (GeneralSecurityException | IOException e) {
+						Main.logger.log("Could not save authentication info for user (" + user.getId() + ")", 3, e);
+						throw new TweetItException.EAuthentication(user.getUsername(),
+								"Could not save authentication info for user (" + user.getId() + ")");
+					}
+					UserLoader.storeTempUser(user);
+				}
+				Main.logger.log("Registered new TwitterUser! user=" + user.getId(), 1);
 			}
 		}
 	}

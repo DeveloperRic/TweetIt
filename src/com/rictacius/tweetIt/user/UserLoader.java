@@ -25,6 +25,7 @@ import winterwell.jtwitter.OAuthSignpostClient;
  */
 public class UserLoader {
 	private static HashMap<String, TwitterUser> users = new HashMap<String, TwitterUser>();
+	private static HashMap<String, TwitterUser> tempUsers = new HashMap<String, TwitterUser>();
 	private static Main plugin = Main.pl;
 
 	public UserLoader() {
@@ -146,6 +147,25 @@ public class UserLoader {
 		return users;
 	}
 
+	public static void storeTempUser(TwitterUser user) {
+		tempUsers.put(user.getId(), user);
+	}
+
+	public static TwitterUser getTempUser(String ID) {
+		if (tempUsers.containsKey(ID)) {
+			TwitterUser user = tempUsers.get(ID);
+			tempUsers.remove(ID);
+			try {
+				Main.auth.clearAccessToken(ID);
+			} catch (IOException e) {
+				Main.logger.log("Could not clear tokens for temporary user=" + ID, 3, e);
+				e.printStackTrace();
+			}
+			return user;
+		}
+		return null;
+	}
+
 	public static void storeUser(TwitterUser user) {
 		File defaultFile = new File(plugin.getDataFolder(), "/default-user.yml");
 		File file = new File(plugin.getDataFolder(), "/users/" + user.getId() + ".yml");
@@ -188,5 +208,6 @@ public class UserLoader {
 			e.printStackTrace();
 		}
 		users.put(user.getId(), user);
+		Main.logger.log("Saved user details for user=" + user.getId(), 1);
 	}
 }

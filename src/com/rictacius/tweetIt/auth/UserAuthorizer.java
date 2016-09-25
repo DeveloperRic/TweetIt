@@ -111,6 +111,7 @@ public class UserAuthorizer {
 	 * @throws Exception
 	 */
 	public void requestTokens(TwitterUser user) throws Exception {
+		Main.logger.log("Requesting tokens for " + user.getId(), 1);
 		OAuthSignpostClient oauthClient = new OAuthSignpostClient(Main.consumerKey, Main.consumerSecret, "oob");
 		user.message("");
 		user.message(ChatColor.GREEN + "Contacting Twitter...");
@@ -128,6 +129,10 @@ public class UserAuthorizer {
 				user.message(ChatColor.RED + "Detected defective ConsumerKey and/or ConsumerSecret. "
 						+ "If you are an admin, please configure TweetIt properly to use its API!");
 			}
+			Main.logger.log(
+					"Failed to get oath URL for " + user.getId()
+							+ "! Detected defective ConsumerKey and/or ConsumerSecret, please configure TweetIt immediately to use its API!",
+					3, e);
 		}
 		user.message(ChatColor.GREEN + "When done, type in the verification PIN from Twitter in chat.");
 		Main.pl.registerTokenEvents(new TokenRequester(user, oauthClient));
@@ -174,12 +179,22 @@ public class UserAuthorizer {
 	public void storeAccessToken(String userID, String[] codes) throws GeneralSecurityException, IOException {
 		// store accessToken.getToken()
 		// store accessToken.getTokenSecret()
+		Main.logger.log("Encrypting tokens for user=" + userID, 1);
 		String token;
 		token = TweetItEncrypter.encrypt(codes[0]);
 		String secret = TweetItEncrypter.encrypt(codes[1]);
 		accessKeysConfig.set("keys." + userID + ".token", token);
 		accessKeysConfig.set("keys." + userID + ".tokenSecret", secret);
 		accessKeysConfig.save(accessKeysFile);
+		Main.logger.log("Saved user tokens for user=" + userID, 1);
+	}
+
+	public void clearAccessToken(String userID) throws IOException {
+		accessKeysConfig.set("keys." + userID + ".token", null);
+		accessKeysConfig.set("keys." + userID + ".tokenSecret", null);
+		accessKeysConfig.set("keys." + userID, null);
+		accessKeysConfig.save(accessKeysFile);
+		Main.logger.log("Cleared user tokens for user=" + userID, 1);
 	}
 
 	/**
