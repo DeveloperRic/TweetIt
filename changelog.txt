@@ -1,0 +1,50 @@
+TweetIt API Changelog takes effect as of version 0.2.0
+Version 1.0.1:
+ + Method: (Class: UserAuthorizer) clearAccessToken(String userID)
+ + Constant: (Enum: TwitterUserType) DISPOSABLE_PLAYER
+ + Method: (Class: UserLoader) storeTempUser(TwitterUser user)
+ + Method: (Class: UserLoader) getTempUser(String ID)
+Version 1.0.0:
+ + Package: com.rictacius.tweetIt.events
+ + (A)Class: Cancelable
+ + Class: ClassListener
+ + Class: Handler
+ + Enum: Priority
+ + (A)Class: TweetItEvent
+ + Annotation: TweetItEventHandler
+ + Interface: TweetITListener
+ + (A)Class: TwinUserEvent
+ + Class: UserDeletedDirectMessageEvent
+ + Class: UserDeletedTweetEvent
+ + Class: UserFollowedUserEvent
+ + Class: UserLikeTweetEvent
+ + Class: UserRetweetEvent
+ + Class: UserSearchEvent
+ + Class: UserSentDirectMessageEvent
+ + Class: UserSentTweetEvent
+ + Class: UserUnfollowedUserEvent
+ + Class: UserUnlikeTweetEvent
+ + Method (Class: Log): log(String message, int lvl, Exception e)
+ + (S)Class: TweetItException.EAuthentication
+ + (S)Class: TweetItException.EUser
+ + (S)Class: TweetItException.ERate
+ + (S)Class: TweetItException.EOperation
+ + (S)Class: TweetItException.EListener
+ + (S)Class: TweetItException.EEvent
+Version 0.3.0:
+ + Class: TokenRequesterChild
+ + requestTokens(TwitterUser parent, TwitterUser child)
+ + loadConfig(FileConfiguration config, File file)
+ + saveConfig(FileConfiguration config, File file)
+ + Class: ConfigUpdater
+ + Enum: ConfigType
+ + getAttachments()
+ + setAttachments(List<TwitterUser> attachments)
+ + /tweetit testauthchild <childID>
+Version 0.2.0:
+ - getDirectMessageImage
+ + getDirectMessageBufferedImage
+ + JavaDoc update for TwitterUser
+ + Class: TweetItMethods
+ + AutoEnabled Logger
+ * Fix: Log class
