@@ -1,4 +1,10 @@
 TweetIt API Changelog takes effect as of version 0.2.0
+Version 1.1.0:
+ + Enum: Log.Level
+ + Method (Class: Log): log(String message, Level lvl)
+ + Method (Class: Log): log(String message, Level lvl, Exception e)
+ + (S)(F)Method (Class: TweetItMethods): getUser(String ID, TwitterUserType type)
+ + (S)(F)Method (Class: TweetItMethods): getTempUser(String ID)
 Version 1.0.1:
  + Method: (Class: UserAuthorizer) clearAccessToken(String userID)
  + Constant: (Enum: TwitterUserType) DISPOSABLE_PLAYER
