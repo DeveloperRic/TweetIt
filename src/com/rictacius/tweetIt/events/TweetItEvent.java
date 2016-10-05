@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.rictacius.tweetIt.Main;
 import com.rictacius.tweetIt.user.TwitterUser;
+import com.rictacius.tweetIt.utils.Log;
 import com.rictacius.tweetIt.utils.TweetItException;
 import com.rictacius.tweetIt.utils.TweetItException.EListener;
 
@@ -56,7 +57,7 @@ public abstract class TweetItEvent {
 	public TweetItEvent(EventType eventType, TwitterUser primary) {
 		this.eventType = eventType;
 		this.primary = primary;
-		Main.logger.log("Created new TweetIt Event {event=" + eventType.toString() + "}", 1);
+		Main.logger.log("Created new TweetIt Event {event=" + eventType.toString() + "}", Log.Level.INFO);
 	}
 
 	/**
@@ -82,45 +83,27 @@ public abstract class TweetItEvent {
 	 * Delivers the event to all listeners in order of priority
 	 */
 	public void deliver() {
-		Main.logger.log("Started delivering event {event=" + eventType.toString() + "} ", 1);
-		for (Handler handler : getHandlers()) {
-			for (Method method : handler.getDeclaredMethods().keySet()) {
-				Priority priority = handler.getPriority(method);
-				if (priority.equals(Priority.HIGH)) {
-					EventType type = handler.getDeclaredMethods().get(method);
-					if (type.equals(eventType)) {
-						try {
-							method.invoke(handler.getInstance(), this);
-							Main.logger.log("Delivered event {event=" + eventType.toString() + "} to "
-									+ handler.getListeningClass().getName() + " (" + method.getName() + ")", 1);
-						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-							e.printStackTrace();
-							try {
-								throw new TweetItException.EListener(handler.getListeningClass(), method,
-										"Could not deliver event " + eventType.toString());
-							} catch (EListener e1) {
-								Main.logger.log(
-										"Could not deliver event {event=" + eventType.toString() + "} to "
-												+ handler.getListeningClass().getName() + " (" + method.getName() + ")",
-										3, e1);
-								e1.printStackTrace();
-							}
-						}
-					}
-				}
-			}
-		}
+		Main.logger.log("Started delivering event {event=" + eventType.toString() + "} ", Log.Level.INFO);
+		deliverEvent(Priority.HIGH);
+		deliverEvent(Priority.NORMAL);
+		deliverEvent(Priority.LOW);
+		deliverEvent(Priority.MONITOR);
+		Main.logger.log("Event delivering sequence complete! {event=" + eventType.toString() + "} ", Log.Level.INFO);
+	}
 
+	private void deliverEvent(Priority listenerPriority) {
 		for (Handler handler : getHandlers()) {
 			for (Method method : handler.getDeclaredMethods().keySet()) {
 				Priority priority = handler.getPriority(method);
-				if (priority.equals(Priority.NORMAL)) {
+				if (priority.equals(listenerPriority)) {
 					EventType type = handler.getDeclaredMethods().get(method);
 					if (type.equals(eventType)) {
 						try {
 							method.invoke(handler.getInstance(), this);
-							Main.logger.log("Delivered event {event=" + eventType.toString() + "} to "
-									+ handler.getListeningClass().getName() + " (" + method.getName() + ")", 1);
+							Main.logger.log(
+									"Delivered event {event=" + eventType.toString() + "} to "
+											+ handler.getListeningClass().getName() + " (" + method.getName() + ")",
+									Log.Level.INFO);
 						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 							e.printStackTrace();
 							try {
@@ -130,7 +113,7 @@ public abstract class TweetItEvent {
 								Main.logger.log(
 										"Could not deliver event {event=" + eventType.toString() + "} to "
 												+ handler.getListeningClass().getName() + " (" + method.getName() + ")",
-										3, e1);
+										Log.Level.FATAL, e1);
 								e1.printStackTrace();
 							}
 						}
@@ -138,63 +121,6 @@ public abstract class TweetItEvent {
 				}
 			}
 		}
-
-		for (Handler handler : getHandlers()) {
-			for (Method method : handler.getDeclaredMethods().keySet()) {
-				Priority priority = handler.getPriority(method);
-				if (priority.equals(Priority.LOW)) {
-					EventType type = handler.getDeclaredMethods().get(method);
-					if (type.equals(eventType)) {
-						try {
-							method.invoke(handler.getInstance(), this);
-							Main.logger.log("Delivered event {event=" + eventType.toString() + "} to "
-									+ handler.getListeningClass().getName() + " (" + method.getName() + ")", 1);
-						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-							e.printStackTrace();
-							try {
-								throw new TweetItException.EListener(handler.getListeningClass(), method,
-										"Could not deliver event " + eventType.toString());
-							} catch (EListener e1) {
-								Main.logger.log(
-										"Could not deliver event {event=" + eventType.toString() + "} to "
-												+ handler.getListeningClass().getName() + " (" + method.getName() + ")",
-										3, e1);
-								e1.printStackTrace();
-							}
-						}
-					}
-				}
-			}
-		}
-
-		for (Handler handler : getHandlers()) {
-			for (Method method : handler.getDeclaredMethods().keySet()) {
-				Priority priority = handler.getPriority(method);
-				if (priority.equals(Priority.MONITOR)) {
-					EventType type = handler.getDeclaredMethods().get(method);
-					if (type.equals(eventType)) {
-						try {
-							method.invoke(handler.getInstance(), this);
-							Main.logger.log("Delivered event {event=" + eventType.toString() + "} to "
-									+ handler.getListeningClass().getName() + " (" + method.getName() + ")", 1);
-						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-							e.printStackTrace();
-							try {
-								throw new TweetItException.EListener(handler.getListeningClass(), method,
-										"Could not deliver event " + eventType.toString());
-							} catch (EListener e1) {
-								Main.logger.log(
-										"Could not deliver event {event=" + eventType.toString() + "} to "
-												+ handler.getListeningClass().getName() + " (" + method.getName() + ")",
-										3, e1);
-								e1.printStackTrace();
-							}
-						}
-					}
-				}
-			}
-		}
-		Main.logger.log("Event delivering sequence complete! {event=" + eventType.toString() + "} ", 1);
 	}
 
 	/**

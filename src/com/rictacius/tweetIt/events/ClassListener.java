@@ -11,6 +11,7 @@ import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.Plugin;
 
 import com.rictacius.tweetIt.Main;
+import com.rictacius.tweetIt.utils.Log;
 import com.rictacius.tweetIt.utils.TweetItException;
 import com.rictacius.tweetIt.utils.TweetItException.EListener;
 
@@ -55,7 +56,7 @@ public class ClassListener implements Listener {
 		if (registered.size() > 0) {
 			ClassListener.listeners.put(listener, registered);
 			ClassListener.priorities.put(listener, priority);
-			Main.logger.log("Registered events in listener " + listener.getClass().getName(), 1);
+			Main.logger.log("Registered events in listener " + listener.getClass().getName(), Log.Level.INFO);
 		}
 		return registered.size();
 	}

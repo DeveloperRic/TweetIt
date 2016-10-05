@@ -11,6 +11,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import com.rictacius.tweetIt.Main;
 import com.rictacius.tweetIt.user.TwitterUser;
 import com.rictacius.tweetIt.user.UserLoader;
+import com.rictacius.tweetIt.utils.Log;
 import com.rictacius.tweetIt.utils.TweetItException;
 
 import winterwell.jtwitter.OAuthSignpostClient;
@@ -38,7 +39,7 @@ public class TokenRequesterChild implements Listener {
 			parent.message(ChatColor.LIGHT_PURPLE + "Now Listening for your input, type @cancel to cancel");
 		} catch (TweetItException e) {
 			Main.logger.log("Could not initialise TokenRequester for (" + child.getId() + ") parent user is offline!",
-					3);
+					Log.Level.FATAL);
 		}
 		listening = true;
 	}

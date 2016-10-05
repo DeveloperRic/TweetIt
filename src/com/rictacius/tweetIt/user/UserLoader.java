@@ -11,6 +11,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.rictacius.tweetIt.Main;
+import com.rictacius.tweetIt.utils.Log;
 import com.rictacius.tweetIt.utils.TweetItException;
 import com.rictacius.tweetIt.utils.config.ConfigType;
 import com.rictacius.tweetIt.utils.config.ConfigUpdater;
@@ -38,19 +39,19 @@ public class UserLoader {
 		} catch (FileNotFoundException e) {
 			Main.logger.log("[TweetIt] Could not load User file " + file.getName()
 					+ " make sure you do not edit user files manually." + " Reset the user config and report the bug.",
-					3);
+					Log.Level.FATAL);
 			e.printStackTrace();
 			return null;
 		} catch (IOException e) {
 			Main.logger.log("[TweetIt] Could not load User file " + file.getName()
 					+ " make sure you do not edit user files manually." + " Reset the user config and report the bug.",
-					3);
+					Log.Level.FATAL);
 			e.printStackTrace();
 			return null;
 		} catch (InvalidConfigurationException e) {
 			Main.logger.log("[TweetIt] Could not load User file " + file.getName()
 					+ " make sure you do not edit user files manually." + " Reset the user config and report the bug.",
-					3);
+					Log.Level.FATAL);
 			e.printStackTrace();
 			return null;
 		}
@@ -61,7 +62,7 @@ public class UserLoader {
 		try {
 			config.save(file);
 		} catch (IOException e) {
-			Main.logger.log("[TweetIt] Could not save User file! Please report this!", 3);
+			Main.logger.log("[TweetIt] Could not save User file! Please report this!", Log.Level.FATAL);
 			e.printStackTrace();
 			return false;
 		}
@@ -108,7 +109,7 @@ public class UserLoader {
 				} else {
 					Main.logger.log("[TweetIt] Could not load User file " + userFile.getName()
 							+ " (TwitterUserType is invalid) make sure you do not edit user files manually."
-							+ " Reset the user config and report the bug.", 3);
+							+ " Reset the user config and report the bug.", Log.Level.FATAL);
 				}
 				OAuthSignpostClient client = null;
 				try {
@@ -117,17 +118,17 @@ public class UserLoader {
 				} catch (GeneralSecurityException e) {
 					Main.logger.log("[TweetIt] Could not load User file " + userFile.getName()
 							+ " (Could not decrypt user keys) make sure you do not edit user files manually."
-							+ " Reset the user config and report the bug.", 3);
+							+ " Reset the user config and report the bug.", Log.Level.FATAL);
 					e.printStackTrace();
 				} catch (IOException e) {
 					Main.logger.log("[TweetIt] Could not load User file " + userFile.getName()
 							+ " (Could not access user keys) make sure you do not edit user files manually."
-							+ " Reset the user config and report the bug.", 3);
+							+ " Reset the user config and report the bug.", Log.Level.FATAL);
 					e.printStackTrace();
 				} catch (TweetItException e) {
 					Main.logger.log("[TweetIt] Could not load User file " + userFile.getName()
 							+ " (User has not authnticated TweetIt for thier twitter account!) make sure you do not edit user files manually."
-							+ " Reset the user config and report the bug.", 3);
+							+ " Reset the user config and report the bug.", Log.Level.FATAL);
 					userFile.delete();
 				}
 				TwitterUser user = new TwitterUser(type, id, username);
@@ -151,6 +152,10 @@ public class UserLoader {
 		tempUsers.put(user.getId(), user);
 	}
 
+	public static TwitterUser getUser(String ID) {
+		return users.get(ID);
+	}
+
 	public static TwitterUser getTempUser(String ID) {
 		if (tempUsers.containsKey(ID)) {
 			TwitterUser user = tempUsers.get(ID);
@@ -158,7 +163,7 @@ public class UserLoader {
 			try {
 				Main.auth.clearAccessToken(ID);
 			} catch (IOException e) {
-				Main.logger.log("Could not clear tokens for temporary user=" + ID, 3, e);
+				Main.logger.log("Could not clear tokens for temporary user=" + ID, Log.Level.FATAL, e);
 				e.printStackTrace();
 			}
 			return user;
@@ -186,15 +191,15 @@ public class UserLoader {
 		try {
 			config.load(file);
 		} catch (FileNotFoundException e) {
-			Main.logger.log("[TweetIt] Could not create User file! Please report this!", 3);
+			Main.logger.log("[TweetIt] Could not create User file! Please report this!", Log.Level.FATAL);
 			e.printStackTrace();
 		} catch (IOException e) {
 			Main.logger.log("[TweetIt] Could not load User file! Please report this!"
-					+ " Please reset your default config by deleting it!", 3);
+					+ " Please reset your default config by deleting it!", Log.Level.FATAL);
 			e.printStackTrace();
 		} catch (InvalidConfigurationException e) {
 			Main.logger.log("[TweetIt] Could not load User file! Please report this!"
-					+ " Please reset your default config by deleting it!", 3);
+					+ " Please reset your default config by deleting it!", Log.Level.FATAL);
 			e.printStackTrace();
 		}
 		config.set("username", user.getUsername());
@@ -204,10 +209,10 @@ public class UserLoader {
 		try {
 			config.save(file);
 		} catch (IOException e) {
-			Main.logger.log("[TweetIt] Could not save User file! Please report this!", 3);
+			Main.logger.log("[TweetIt] Could not save User file! Please report this!", Log.Level.FATAL);
 			e.printStackTrace();
 		}
 		users.put(user.getId(), user);
-		Main.logger.log("Saved user details for user=" + user.getId(), 1);
+		Main.logger.log("Saved user details for user=" + user.getId(), Log.Level.INFO);
 	}
 }

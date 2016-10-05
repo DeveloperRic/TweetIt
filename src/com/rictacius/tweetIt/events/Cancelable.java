@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 
 import com.rictacius.tweetIt.Main;
 import com.rictacius.tweetIt.user.TwitterUser;
+import com.rictacius.tweetIt.utils.Log;
 
 /**
  * Declares an event which can be canceled or at least reversed
@@ -77,7 +78,7 @@ public abstract class Cancelable extends TweetItEvent {
 				count++;
 			}
 		}
-		Main.logger.log("[EVENT RESPONSE] canceled=" + value + " state=" + canceled, 1);
+		Main.logger.log("[EVENT RESPONSE] canceled=" + value + " state=" + canceled, Log.Level.INFO);
 	}
 
 	/**

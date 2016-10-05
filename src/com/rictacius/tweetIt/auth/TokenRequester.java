@@ -12,6 +12,7 @@ import com.rictacius.tweetIt.Main;
 import com.rictacius.tweetIt.user.TwitterUser;
 import com.rictacius.tweetIt.user.TwitterUserType;
 import com.rictacius.tweetIt.user.UserLoader;
+import com.rictacius.tweetIt.utils.Log;
 import com.rictacius.tweetIt.utils.TweetItException;
 
 import winterwell.jtwitter.OAuthSignpostClient;
@@ -41,9 +42,10 @@ public class TokenRequester implements Listener {
 		try {
 			user.message(ChatColor.LIGHT_PURPLE + "Now Listening for your input, type @cancel to cancel");
 		} catch (TweetItException e) {
-			Main.logger.log("Could not initialise TokenRequester for (" + user.getId() + ") user is offline!", 3);
+			Main.logger.log("Could not initialise TokenRequester for (" + user.getId() + ") user is offline!",
+					Log.Level.FATAL);
 		}
-		Main.logger.log("Created new TokenRequester for " + user.getId() + "!", 1);
+		Main.logger.log("Created new TokenRequester for " + user.getId() + "!", Log.Level.INFO);
 		listening = true;
 	}
 
@@ -58,7 +60,7 @@ public class TokenRequester implements Listener {
 				if (event.getMessage().equals("@cancel")) {
 					listening = false;
 					user.message(ChatColor.GOLD + "No longer listening for your input.");
-					Main.logger.log("Stopped listening for inputs", 1);
+					Main.logger.log("Stopped listening for inputs", Log.Level.INFO);
 					return;
 				}
 				user.message(ChatColor.GOLD + "Validating Verification code...");
@@ -70,7 +72,8 @@ public class TokenRequester implements Listener {
 								ChatColor.RED + "Could not verifiy that verification code! See console for details!");
 					} catch (TweetItException e1) {
 					}
-					Main.logger.log("Could not verifiy that verification code of user (" + user.getId() + ")", 3, e);
+					Main.logger.log("Could not verifiy that verification code of user (" + user.getId() + ")",
+							Log.Level.FATAL, e);
 					throw new TweetItException.EAuthentication(user.getUsername(),
 							"Could not verifiy that verification code of user (" + user.getId() + ")");
 				}
@@ -91,7 +94,8 @@ public class TokenRequester implements Listener {
 					try {
 						Main.auth.storeAccessToken(user.getId(), authCodes);
 					} catch (GeneralSecurityException | IOException e) {
-						Main.logger.log("Could not save authentication info for user (" + user.getId() + ")", 3, e);
+						Main.logger.log("Could not save authentication info for user (" + user.getId() + ")",
+								Log.Level.FATAL, e);
 						throw new TweetItException.EAuthentication(user.getUsername(),
 								"Could not save authentication info for user (" + user.getId() + ")");
 					}
@@ -100,13 +104,14 @@ public class TokenRequester implements Listener {
 					try {
 						Main.auth.storeAccessToken(user.getId(), authCodes);
 					} catch (GeneralSecurityException | IOException e) {
-						Main.logger.log("Could not save authentication info for user (" + user.getId() + ")", 3, e);
+						Main.logger.log("Could not save authentication info for user (" + user.getId() + ")",
+								Log.Level.FATAL, e);
 						throw new TweetItException.EAuthentication(user.getUsername(),
 								"Could not save authentication info for user (" + user.getId() + ")");
 					}
 					UserLoader.storeTempUser(user);
 				}
-				Main.logger.log("Registered new TwitterUser! user=" + user.getId(), 1);
+				Main.logger.log("Registered new TwitterUser! user=" + user.getId(), Log.Level.INFO);
 			}
 		}
 	}

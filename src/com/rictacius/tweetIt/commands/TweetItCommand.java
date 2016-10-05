@@ -11,6 +11,7 @@ import com.rictacius.tweetIt.Main;
 import com.rictacius.tweetIt.user.TwitterUser;
 import com.rictacius.tweetIt.user.TwitterUserType;
 import com.rictacius.tweetIt.utils.ErrorFile;
+import com.rictacius.tweetIt.utils.Log;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -63,7 +64,7 @@ public class TweetItCommand implements CommandExecutor {
 			try {
 				Main.auth.requestTokens(user);
 			} catch (Exception e) {
-				Main.logger.log("Could not test TweetIt Authentication while requesting tokens!", 2);
+				Main.logger.log("Could not test TweetIt Authentication while requesting tokens!", Log.Level.WARNING);
 				e.printStackTrace();
 			}
 		} else if (args[0].equalsIgnoreCase("testauthchild")) {
@@ -85,7 +86,7 @@ public class TweetItCommand implements CommandExecutor {
 			try {
 				Main.auth.requestTokens(parent, child);
 			} catch (Exception e) {
-				Main.logger.log("Could not test TweetIt Authentication while requesting tokens!", 2);
+				Main.logger.log("Could not test TweetIt Authentication while requesting tokens!", Log.Level.WARNING);
 				e.printStackTrace();
 			}
 		} else {
