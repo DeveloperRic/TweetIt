@@ -13,10 +13,12 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.rictacius.tweetIt.Updater;
 import com.rictacius.tweetIt.auth.TokenRequester;
 import com.rictacius.tweetIt.auth.TokenRequesterChild;
 import com.rictacius.tweetIt.auth.UserAuthorizer;
 import com.rictacius.tweetIt.commands.TweetItCommand;
+import com.rictacius.tweetIt.user.TwitterUser;
 import com.rictacius.tweetIt.user.UserLoader;
 import com.rictacius.tweetIt.utils.Log;
 import com.rictacius.tweetIt.utils.PinParser;
@@ -36,6 +38,24 @@ public class Main extends JavaPlugin implements Listener {
 		registerCommands();
 		Methods.sendColoredMessage(this, ChatColor.AQUA, ("Registering Events...."), ChatColor.YELLOW);
 		registerEvents();
+		Methods.sendColoredMessage(this, ChatColor.AQUA, ("Checking for updates...."), ChatColor.YELLOW);
+		boolean update = Updater.check();
+		if (update) {
+			Methods.sendColoredMessage(this, ChatColor.AQUA, ("Found update (v" + Updater.newVersion + ")."), ChatColor.GREEN);
+			if (config.getString("auto-update") == null) {
+				config.set("auto-update", true);
+				saveConfig();
+			}
+			if (Boolean.parseBoolean(config.getString("auto-update"))) {
+				Methods.sendColoredMessage(this, ChatColor.AQUA, ("Auto-updating AuctionRoom..."), ChatColor.YELLOW);
+				Updater.download();
+				Methods.sendColoredMessage(this, ChatColor.AQUA,
+						("Downloaded update (v" + Updater.newVersion + ") Please restart your server to install it!"),
+						ChatColor.GREEN);
+			}
+		} else {
+			Methods.sendColoredMessage(this, ChatColor.AQUA, ("TweetIt is up to date."), ChatColor.GREEN);
+		}
 		Methods.sendColoredMessage(this, ChatColor.AQUA,
 				(pdfFile.getName() + " has been enabled! (V." + pdfFile.getVersion() + ")"), ChatColor.GREEN);
 	}
@@ -63,6 +83,9 @@ public class Main extends JavaPlugin implements Listener {
 	}
 
 	public void onDisable() {
+		for (TwitterUser user : UserLoader.getUsers().values()) {
+			UserLoader.storeUser(user);
+		}
 		Methods.sendColoredMessage(this, ChatColor.AQUA,
 				(pdfFile.getName() + " has been disabled! (V." + pdfFile.getVersion() + ")"), ChatColor.YELLOW);
 	}

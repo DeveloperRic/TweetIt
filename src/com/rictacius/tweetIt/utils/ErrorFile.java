@@ -1,8 +1,6 @@
 package com.rictacius.tweetIt.utils;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,7 +9,6 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -45,26 +42,7 @@ public class ErrorFile {
 			SimpleDateFormat formatter = new SimpleDateFormat("EEEE-MMMM-d-yyyy-HH-mm");
 			String date = formatter.format(now);
 			File errorFile = new File(plugin.getDataFolder().getPath() + "/errors/" + date + ".yml");
-			File defaultfile = new File(plugin.getDataFolder().getPath() + "/default-error.yml");
-			if (!defaultfile.exists()) {
-				errorFile.getParentFile().mkdirs();
-				defaultfile.getParentFile().mkdirs();
-				plugin.saveResource("default-error.yml", true);
-				console.sendMessage(prefix + defaultfile.getPath());
-			}
 			FileConfiguration config = new YamlConfiguration();
-			try {
-				config.load(defaultfile);
-			} catch (FileNotFoundException e) {
-				console.sendMessage(prefix + "Could not find error file path, did you modify the jar contents?");
-				e.printStackTrace();
-			} catch (IOException e) {
-				console.sendMessage(prefix + "Could not load error file, does the file exisit?");
-				e.printStackTrace();
-			} catch (InvalidConfigurationException e) {
-				console.sendMessage(prefix + "Could not load error file did you edit the files contents?");
-				e.printStackTrace();
-			}
 			config.options().copyDefaults(true);
 			config.set("error", error);
 			config.set("date", date);
@@ -114,7 +92,6 @@ public class ErrorFile {
 			}
 			config.set("timeline", timeline);
 			config.save(errorFile);
-			defaultfile.delete();
 			returnl.add(errorFile.getAbsolutePath());
 			URL link = Pastebin.pastePaste("707d4468afc6923cb547cc3eb5a44297", config.saveToString(),
 					"TweetIt Dump File");

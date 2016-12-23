@@ -14,8 +14,8 @@ import com.rictacius.tweetIt.events.TweetItEvent;
 import com.rictacius.tweetIt.utils.TweetItException;
 import com.rictacius.tweetIt.utils.TweetItException.EEvent;
 
-import net.md_5.bungee.api.ChatColor;
 import winterwell.jtwitter.OAuthSignpostClient;
+import winterwell.jtwitter.Twitter;
 import winterwell.jtwitter.User;
 
 /**
@@ -26,8 +26,8 @@ import winterwell.jtwitter.User;
  */
 public class TwitterUser {
 	private TwitterUserType type;
-	private String id;
-	private String username;
+	private UUID owner;
+	private String iD;
 	private String pin;
 	private boolean authenticated;
 	private OAuthSignpostClient client;
@@ -47,23 +47,13 @@ public class TwitterUser {
 	 * </p>
 	 * 
 	 * @param type
-	 * @param id
+	 *            the type of user {@link TwitterUserType}
+	 * @param username
+	 *            the username of the twitter user
 	 */
-	public TwitterUser(TwitterUserType type, String id, String username) {
+	public TwitterUser(TwitterUserType type, String username) {
 		this.setType(type);
-		this.setId(id);
-		this.username = username;
-	}
-
-	public TwitterUser(TweetItEvent.EventType eventType, TwitterUserType type, String username) {
-		if (!type.equals(TwitterUserType.EVENT)) {
-			try {
-				throw new TweetItException.EEvent(eventType,
-						"You cannot use this contructor if you are not making a TweetIt Event!");
-			} catch (EEvent e) {
-				e.printStackTrace();
-			}
-		}
+		this.setId(username);
 	}
 
 	/**
@@ -76,16 +66,33 @@ public class TwitterUser {
 	 * does not need to be. If you would need the username of the user, you
 	 * would need to request it from the user.
 	 * </p>
+	 * <p>
+	 * <strong>You may set the username to <i>null</i> if you have to.</strong>
+	 * </p>
 	 * 
 	 * @param type
-	 * @param id
-	 * @deprecated
-	 * @see #TwitterUser(TwitterUserType, String, String)
+	 *            the type of user {@link TwitterUserType}
+	 * @param username
+	 *            the username of the twitter user The UUID of the player to
+	 *            recieve messages.
 	 */
-	@Deprecated
-	public TwitterUser(TwitterUserType type, String id) {
+	public TwitterUser(TwitterUserType type, String username, UUID owner) {
 		this.setType(type);
-		this.setId(id);
+		this.setId(username);
+		this.owner = owner;
+	}
+
+	public TwitterUser(TweetItEvent.EventType eventType, TwitterUserType type, String username) {
+		if (!type.equals(TwitterUserType.EVENT)) {
+			try {
+				throw new TweetItException.EEvent(eventType,
+						"You cannot use this contructor if you are not making a TweetIt Event!");
+			} catch (EEvent e) {
+				e.printStackTrace();
+			}
+		}
+		this.setType(type);
+		this.setId(username);
 	}
 
 	/**
@@ -104,10 +111,19 @@ public class TwitterUser {
 	}
 
 	/**
-	 * @return the id of the user.
+	 * @return the username of the user.
 	 */
 	public String getId() {
-		return id;
+		return iD;
+	}
+
+	/**
+	 * A duplicated function for {@link #getId()}
+	 * 
+	 * @return the username of the twitter user
+	 */
+	public String getUsername() {
+		return iD;
 	}
 
 	/**
@@ -115,24 +131,15 @@ public class TwitterUser {
 	 *            - the id to set for this user
 	 */
 	public void setId(String id) {
-		this.id = id;
+		this.iD = id;
 	}
 
-	/**
-	 * @return the username of the TwitterUser
-	 */
-	public String getUsername() {
-		return username;
+	public UUID getOwner() {
+		return owner;
 	}
 
-	/**
-	 * <strong>DO NOT EDIT THIS UNLESS YOU KNOW WHAT YOU ARE DOING!</strong>
-	 * 
-	 * @param username
-	 *            the username to set
-	 */
-	public void setUsername(String username) {
-		this.username = username;
+	public void setOwner(UUID owner) {
+		this.owner = owner;
 	}
 
 	/**
@@ -157,18 +164,23 @@ public class TwitterUser {
 	 *             if the TwitterUser is of TwitterUserType PLAYER but the
 	 *             player is not online
 	 */
-	public void message(String message) throws TweetItException {
-		if (type == TwitterUserType.PLAYER || type == TwitterUserType.DISPOSABLE_PLAYER) {
-			try {
-				Bukkit.getPlayer(UUID.fromString(id)).sendMessage(message);
-			} catch (Exception e) {
-				throw new TweetItException.EUser(this, "You cannot send a message to an offline player!");
+	@SuppressWarnings("deprecation")
+	public void message(String message) {
+		if (type == TwitterUserType.PLAYER || type == TwitterUserType.DISPOSABLE_PLAYER
+				|| type == TwitterUserType.OTHER) {
+			if (owner == null) {
+				try {
+					Bukkit.getPlayer(UUID.fromString(iD)).sendMessage(message);
+				} catch (Exception e) {
+				}
+			} else {
+				try {
+					Bukkit.getPlayer(owner).sendMessage(message);
+				} catch (Exception e) {
+				}
 			}
 		} else if (type == TwitterUserType.SYSTEM) {
 			Bukkit.getConsoleSender().sendMessage(message);
-		} else {
-			Bukkit.getConsoleSender()
-					.sendMessage(ChatColor.GREEN + "" + ChatColor.BOLD + "(" + id + ")" + ChatColor.RESET + message);
 		}
 	}
 
@@ -224,6 +236,7 @@ public class TwitterUser {
 	 * 
 	 * @return a list of TwitterUsers or null if the process was unsucessful
 	 */
+	@SuppressWarnings("deprecation")
 	public List<TwitterUser> getAttachments() {
 		List<TwitterUser> attachments = new ArrayList<TwitterUser>();
 		if (type == TwitterUserType.TEMPORARY || type == TwitterUserType.DISPOSABLE_PLAYER) {
@@ -231,7 +244,7 @@ public class TwitterUser {
 		}
 		Main plugin = Main.pl;
 		File defaultFile = new File(plugin.getDataFolder(), "/default-user.yml");
-		File file = new File(plugin.getDataFolder(), "/users/" + id + ".yml");
+		File file = new File(plugin.getDataFolder(), "/users/" + iD + ".yml");
 		if (!file.exists()) {
 			file.getParentFile().mkdirs();
 			plugin.saveResource("default-user.yml", false);
@@ -270,7 +283,7 @@ public class TwitterUser {
 	public boolean setAttachments(List<TwitterUser> attachments) {
 		Main plugin = Main.pl;
 		File defaultFile = new File(plugin.getDataFolder(), "/default-user.yml");
-		File file = new File(plugin.getDataFolder(), "/users/" + id + ".yml");
+		File file = new File(plugin.getDataFolder(), "/users/" + iD + ".yml");
 		if (!file.exists()) {
 			file.getParentFile().mkdirs();
 			plugin.saveResource("default-user.yml", false);
@@ -300,7 +313,11 @@ public class TwitterUser {
 	 *         username is not set
 	 */
 	public User generateUser() {
-		String username = getUsername();
-		return (username == null) ? null : (username.length() == 0) ? null : new User(username);
+		try {
+			Twitter twitter = new Twitter(iD, client);
+			return twitter.getSelf();
+		} catch (Exception e) {
+			return null;
+		}
 	}
 }

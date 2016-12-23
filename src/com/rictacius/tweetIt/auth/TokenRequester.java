@@ -16,6 +16,7 @@ import com.rictacius.tweetIt.utils.Log;
 import com.rictacius.tweetIt.utils.TweetItException;
 
 import winterwell.jtwitter.OAuthSignpostClient;
+import winterwell.jtwitter.Twitter;
 import winterwell.jtwitter.TwitterException;
 
 /**
@@ -39,16 +40,12 @@ public class TokenRequester implements Listener {
 	public TokenRequester(TwitterUser user, OAuthSignpostClient oauthClient) {
 		this.user = user;
 		this.client = oauthClient;
-		try {
-			user.message(ChatColor.LIGHT_PURPLE + "Now Listening for your input, type @cancel to cancel");
-		} catch (TweetItException e) {
-			Main.logger.log("Could not initialise TokenRequester for (" + user.getId() + ") user is offline!",
-					Log.Level.FATAL);
-		}
+		user.message(ChatColor.LIGHT_PURPLE + "Now Listening for your input, type @cancel to cancel");
 		Main.logger.log("Created new TokenRequester for " + user.getId() + "!", Log.Level.INFO);
 		listening = true;
 	}
 
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void listenForPin(AsyncPlayerChatEvent event) throws TweetItException {
 		if (!event.isCancelled()) {
@@ -67,11 +64,7 @@ public class TokenRequester implements Listener {
 				try {
 					client.setAuthorizationCode(event.getMessage());
 				} catch (TwitterException e) {
-					try {
-						user.message(
-								ChatColor.RED + "Could not verifiy that verification code! See console for details!");
-					} catch (TweetItException e1) {
-					}
+					user.message(ChatColor.RED + "Could not verifiy that verification code! See console for details!");
 					Main.logger.log("Could not verifiy that verification code of user (" + user.getId() + ")",
 							Log.Level.FATAL, e);
 					throw new TweetItException.EAuthentication(user.getUsername(),
@@ -89,6 +82,8 @@ public class TokenRequester implements Listener {
 				user.message(ChatColor.GOLD + "PIN: " + ChatColor.YELLOW + pin);
 				user.message("");
 				user.setPin(pin);
+				Twitter twitter = new Twitter(user.getUsername(), user.getClient());
+				user.setId(twitter.getSelf().getScreenName());
 				if (user.getType() != TwitterUserType.TEMPORARY
 						&& user.getType() != TwitterUserType.DISPOSABLE_PLAYER) {
 					try {

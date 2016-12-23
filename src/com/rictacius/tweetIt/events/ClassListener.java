@@ -33,7 +33,7 @@ public class ClassListener implements Listener {
 	 * Registers a new class and its event methods.
 	 * 
 	 * @param listener
-	 * @return
+	 * @return the number of registered events
 	 * @throws EListener
 	 */
 	public static <T extends TweetItListener> int registerEvents(Object listener) throws EListener {
